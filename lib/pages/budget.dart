@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:hackathon_demo/main.dart';
+import 'package:hackathon_demo/my_flutter_app_icons.dart';
 import 'package:hackathon_demo/pages/balance.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:flutter_circular_chart/flutter_circular_chart.dart';
 import 'package:flutter/services.dart';
+import 'package:collection/collection.dart';
 
 class BudgetWidget extends StatefulWidget {
   BudgetWidget({Key key}) : super(key: key);
@@ -15,96 +18,32 @@ class _SettingsWidgetState extends State<BudgetWidget> {
   final GlobalKey<AnimatedCircularChartState> _chartKey =
       new GlobalKey<AnimatedCircularChartState>();
 
-  List<CircularStackEntry> data = <CircularStackEntry>[
-    new CircularStackEntry(
-      <CircularSegmentEntry>[
-        new CircularSegmentEntry(500.0, Colors.red[200], rankKey: 'Q1'),
-        new CircularSegmentEntry(1000.0, Colors.green[200], rankKey: 'Q2'),
-        new CircularSegmentEntry(2000.0, Colors.blue[200], rankKey: 'Q3'),
-        new CircularSegmentEntry(1000.0, Colors.yellow[200], rankKey: 'Q4'),
-      ],
-      rankKey: 'Quarterly Profits',
-    ),
-  ];
+  TextEditingController savingsController = TextEditingController();
+  TextEditingController tuitionController = TextEditingController();
 
-  List _cities = [
-    "University of Waterloo",
-    "Wilfrid Laurier University",
-    "University of Toronto",
-    "McGill University",
-    "Conestoga College"
-  ];
-
-  List _programs = [
-    "Computer Science",
-    "Biology",
-    "Mechanical Engineering",
-    "Management Engineering",
-    "Optometry"
-  ];
-
-  Map _costs = {
-    "Computer Science": "12000",
-    "Biology": "6000",
-    "Mechanical Engineering": "10000",
-    "Management Engineering": "13000",
-    "Optometry": "20000"
-  };
-
-  List<DropdownMenuItem<String>> _dropDownMenuItems;
-  String _currentCity;
-
-  List<DropdownMenuItem<String>> _dropDownMenuPrograms;
-  String _currentProgram;
-  String _currentCost;
+  Map<String, double> dataMap = new Map();
+  List<bool> buttons = [false, false, false];
+  List<bool> groceryButtons = [false, false, false];
 
   @override
   void initState() {
-    _dropDownMenuItems = getDropDownMenuItems();
-    _currentCity = _dropDownMenuItems[0].value;
-    _dropDownMenuPrograms = getDropDownPrograms();
-    _currentProgram = _dropDownMenuPrograms[0].value;
-    _currentCost = '\$0';
     super.initState();
-  }
 
-  List<DropdownMenuItem<String>> getDropDownPrograms() {
-    List<DropdownMenuItem<String>> items = new List();
-    for (String program in _programs) {
-      items.add(new DropdownMenuItem(value: program, child: new Text(program)));
-    }
-    return items;
-  }
+    savingsController.addListener(() {});
+    tuitionController.addListener(() {});
 
-  List<DropdownMenuItem<String>> getDropDownMenuItems() {
-    List<DropdownMenuItem<String>> items = new List();
-    for (String city in _cities) {
-      items.add(new DropdownMenuItem(value: city, child: new Text(city)));
-    }
-    return items;
+    dataMap.putIfAbsent("Tuition Costs", () => 5000);
+    dataMap.putIfAbsent("Transportation Costs", () => 5000);
+    dataMap.putIfAbsent("Groceries", () => 5000);
+    dataMap.putIfAbsent("Left Over Savings", () => 5000);
   }
 
   @override
   Widget build(BuildContext context) {
-    double transportation = 0;
-
-    Map<String, double> dataMap = new Map();
-    dataMap.putIfAbsent("Tuition Costs", () => 5);
-    dataMap.putIfAbsent("Transportation Costs", () => transportation);
-    dataMap.putIfAbsent("Groceries", () => 2);
-    dataMap.putIfAbsent("Left Over Savings", () => 2);
-
-    TextEditingController controller = TextEditingController();
-
-    controller.addListener(() {
-      print("Second text field: ${controller.text}");
-      transportation = double.parse(controller.text);
-    });
-
     return new Scaffold(
         appBar: AppBar(
-          title: Text('Set Your Budget'),
-          backgroundColor: Color.fromRGBO(73, 159, 104, 1),
+          title: Text('Set Your Budget', style: TextStyle(color: Colors.black)),
+          backgroundColor: Color.fromRGBO(92, 219, 149, 1),
         ),
         body: Center(
           child: Padding(
@@ -128,7 +67,7 @@ class _SettingsWidgetState extends State<BudgetWidget> {
                     chartRadius: MediaQuery.of(context).size.width / 2.7,
                     showChartValuesInPercentage: true,
                     showChartValues: true,
-                    chartValuesColor: Colors.blueGrey[900].withOpacity(0.9),
+                    chartValuesColor: Colors.white,
                     showLegends: true,
                   ),
                   Padding(
@@ -139,7 +78,7 @@ class _SettingsWidgetState extends State<BudgetWidget> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16.0, vertical: 8.0),
                     child: TextField(
-                      controller: controller,
+                      controller: savingsController,
                       inputFormatters: [
                         WhitelistingTextInputFormatter.digitsOnly
                       ],
@@ -148,8 +87,13 @@ class _SettingsWidgetState extends State<BudgetWidget> {
                         icon: Icon(Icons.attach_money),
                         labelText: 'Your Savings',
                       ),
-                      autofocus: true,
                       keyboardType: TextInputType.number,
+                      onEditingComplete: () => {
+                        setState(() {
+                          dataMap["Left Over Savings"] =
+                              double.parse(savingsController.text);
+                        })
+                      },
                     ),
                   ),
                   Padding(
@@ -164,8 +108,14 @@ class _SettingsWidgetState extends State<BudgetWidget> {
                         icon: Icon(Icons.bookmark_border),
                         labelText: 'Your Tuition Costs',
                       ),
-                      autofocus: true,
+                      controller: tuitionController,
                       keyboardType: TextInputType.number,
+                      onEditingComplete: () => {
+                        setState(() {
+                          dataMap["Tuition Costs"] =
+                              double.parse(tuitionController.text);
+                        })
+                      },
                     ),
                   ),
                   Padding(
@@ -186,8 +136,7 @@ class _SettingsWidgetState extends State<BudgetWidget> {
                     padding: const EdgeInsets.all(8.0),
                     child: IntrinsicHeight(
                       child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
                           SizedBox(width: 8.0),
@@ -207,20 +156,31 @@ class _SettingsWidgetState extends State<BudgetWidget> {
                                     child: Text(
                                       'Bike',
                                       style: TextStyle(
-                                          fontSize: 20, color: Colors.grey),
+                                          fontSize: 20,
+                                          color: buttons[0]
+                                              ? Colors.white
+                                              : Colors.grey),
                                     ),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Icon(Icons.directions_bike,
-                                        color: Colors.grey, size: 40),
+                                        color: buttons[0]
+                                            ? Colors.white
+                                            : Colors.grey,
+                                        size: 40),
                                   ),
                                 ],
                               ),
-                              color: Colors.white,
+                              color: buttons[0]
+                                  ? Color.fromRGBO(5, 150, 131, 1)
+                                  : Colors.white,
                               onPressed: () {
                                 setState(() {
-                                  transportation = 6;
+                                  dataMap["Transportation Costs"] = 200;
+                                  buttons[0] = true;
+                                  buttons[1] = false;
+                                  buttons[2] = false;
                                 });
                               },
                             ),
@@ -241,20 +201,31 @@ class _SettingsWidgetState extends State<BudgetWidget> {
                                     child: Text(
                                       'Bus',
                                       style: TextStyle(
-                                          fontSize: 20, color: Colors.grey),
+                                          fontSize: 20,
+                                          color: buttons[1]
+                                              ? Colors.white
+                                              : Colors.grey),
                                     ),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
-                                    child: Icon(Icons.directions_bus,
-                                        color: Colors.grey, size: 40),
+                                    child: Icon(MyFlutterApp.transport,
+                                        color: buttons[1]
+                                            ? Colors.white
+                                            : Colors.grey,
+                                        size: 40),
                                   ),
                                 ],
                               ),
-                              color: Colors.white,
+                              color: buttons[1]
+                                  ? Color.fromRGBO(5, 150, 131, 1)
+                                  : Colors.white,
                               onPressed: () {
                                 setState(() {
-                                  transportation = 6;
+                                  dataMap["Transportation Costs"] = 1000;
+                                  buttons[0] = false;
+                                  buttons[1] = true;
+                                  buttons[2] = false;
                                 });
                               },
                             ),
@@ -275,20 +246,31 @@ class _SettingsWidgetState extends State<BudgetWidget> {
                                     child: Text(
                                       'Car',
                                       style: TextStyle(
-                                          fontSize: 20, color: Colors.grey),
+                                          fontSize: 20,
+                                          color: buttons[2]
+                                              ? Colors.white
+                                              : Colors.grey),
                                     ),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Icon(Icons.directions_car,
-                                        color: Colors.grey, size: 40),
+                                        color: buttons[2]
+                                            ? Colors.white
+                                            : Colors.grey,
+                                        size: 40),
                                   ),
                                 ],
                               ),
-                              color: Colors.white,
+                              color: buttons[2]
+                                  ? Color.fromRGBO(5, 150, 131, 1)
+                                  : Colors.white,
                               onPressed: () {
                                 setState(() {
-                                  transportation = 6;
+                                  dataMap["Transportation Costs"] = 1000;
+                                  buttons[0] = false;
+                                  buttons[1] = false;
+                                  buttons[2] = true;
                                 });
                               },
                             ),
@@ -315,11 +297,10 @@ class _SettingsWidgetState extends State<BudgetWidget> {
                     padding: const EdgeInsets.all(8.0),
                     child: IntrinsicHeight(
                       child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          SizedBox(width: 32.0),
+                          SizedBox(width: 8.0),
                           ButtonTheme(
                             minWidth: 20,
                             shape: RoundedRectangleBorder(
@@ -336,20 +317,31 @@ class _SettingsWidgetState extends State<BudgetWidget> {
                                     child: Text(
                                       'Less',
                                       style: TextStyle(
-                                          fontSize: 20, color: Colors.grey),
+                                          fontSize: 20,
+                                          color: groceryButtons[0]
+                                              ? Colors.white
+                                              : Colors.grey),
                                     ),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
-                                    child: Icon(Icons.arrow_forward_ios,
-                                        color: Colors.grey, size: 40),
+                                    child: Icon(MyFlutterApp.food__2_,
+                                        color: groceryButtons[0]
+                                            ? Colors.white
+                                            : Colors.grey,
+                                        size: 40),
                                   )
                                 ],
                               ),
-                              color: Colors.white,
+                              color: groceryButtons[0]
+                                  ? Color.fromRGBO(5, 150, 131, 1)
+                                  : Colors.white,
                               onPressed: () {
                                 setState(() {
-                                  transportation = 6;
+                                  dataMap["Groceries"] = 4000;
+                                  groceryButtons[0] = true;
+                                  groceryButtons[1] = false;
+                                  groceryButtons[2] = false;
                                 });
                               },
                             ),
@@ -368,22 +360,34 @@ class _SettingsWidgetState extends State<BudgetWidget> {
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Text(
-                                      'Average',
+                                      'Mid',
                                       style: TextStyle(
-                                          fontSize: 20, color: Colors.grey),
+                                          fontSize: 20,
+                                          color: groceryButtons[1]
+                                              ? Colors.white
+                                              : Colors.grey),
                                     ),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
-                                    child: Icon(Icons.blur_circular,
-                                        color: Colors.grey, size: 40),
+                                    child: Tab(
+                                        icon: Icon(MyFlutterApp.fast_food,
+                                            color: groceryButtons[1]
+                                                ? Colors.white
+                                                : Colors.grey,
+                                            size: 40)),
                                   ),
                                 ],
                               ),
-                              color: Colors.white,
+                              color: groceryButtons[1]
+                                  ? Color.fromRGBO(5, 150, 131, 1)
+                                  : Colors.white,
                               onPressed: () {
                                 setState(() {
-                                  transportation = 6;
+                                  dataMap["Groceries"] = 5000;
+                                  groceryButtons[0] = false;
+                                  groceryButtons[1] = true;
+                                  groceryButtons[2] = false;
                                 });
                               },
                             ),
@@ -404,20 +408,31 @@ class _SettingsWidgetState extends State<BudgetWidget> {
                                     child: Text(
                                       'Plus',
                                       style: TextStyle(
-                                          fontSize: 20, color: Colors.grey),
+                                          fontSize: 20,
+                                          color: groceryButtons[2]
+                                              ? Colors.white
+                                              : Colors.grey),
                                     ),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
-                                    child: Icon(Icons.arrow_back_ios,
-                                        color: Colors.grey, size: 40),
+                                    child: Icon(MyFlutterApp.food,
+                                        color: groceryButtons[2]
+                                            ? Colors.white
+                                            : Colors.grey,
+                                        size: 40),
                                   ),
                                 ],
                               ),
-                              color: Colors.white,
+                              color: groceryButtons[2]
+                                  ? Color.fromRGBO(5, 150, 131, 1)
+                                  : Colors.white,
                               onPressed: () {
                                 setState(() {
-                                  transportation = 6;
+                                  dataMap["Groceries"] = 7000;
+                                  groceryButtons[0] = false;
+                                  groceryButtons[1] = false;
+                                  groceryButtons[2] = true;
                                 });
                               },
                             ),
@@ -437,19 +452,34 @@ class _SettingsWidgetState extends State<BudgetWidget> {
                           side: BorderSide(color: Colors.grey),
                         ),
                         child: RaisedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      Balance(cost: _currentCost)),
-                            );
-                          },
-                          child: const Text(
+                          onPressed: activeButton()
+                              ? () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => Balance(cost: {
+                                              "tuition": double.parse(
+                                                  this.tuitionController.text),
+                                              "savings": double.parse(
+                                                  this.savingsController.text),
+                                              "transportation": dataMap[
+                                                  "Transportation Costs"],
+                                              "groceries": dataMap["Groceries"]
+                                            })),
+                                  );
+                                }
+                              : () => {null},
+                          child: new Text(
                             'Next',
-                            style: TextStyle(fontSize: 20, color: Colors.grey),
+                            style: TextStyle(
+                                fontSize: 20,
+                                color: activeButton()
+                                    ? Colors.white
+                                    : Colors.grey),
                           ),
-                          color: Colors.white,
+                          color: activeButton()
+                              ? Color.fromRGBO(5, 56, 107, 1)
+                              : Colors.white,
                           elevation: 3.0,
                         )),
                   ),
@@ -461,16 +491,15 @@ class _SettingsWidgetState extends State<BudgetWidget> {
         ));
   }
 
-  void changedDropDownItem(String selectedCity) {
-    setState(() {
-      _currentCity = selectedCity;
-    });
+  bool activeButton() {
+    if (this.tuitionController.text != "" &&
+        this.savingsController.text != "" &&
+        !(eq(this.buttons, [false, false, false])) &&
+        !(eq(this.groceryButtons, [false, false, false]))) {
+      return true;
+    }
+    return false;
   }
 
-  void changedDropDownProgram(String selectedProgram) {
-    setState(() {
-      _currentProgram = selectedProgram;
-      _currentCost = _costs[_currentProgram];
-    });
-  }
+  Function eq = const ListEquality().equals;
 }
