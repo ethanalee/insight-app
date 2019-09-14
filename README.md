@@ -9,7 +9,7 @@ Hackathon Project: Experimenting with Flutter and Location-Based Apps
 ![Screen 4](https://imgur.com/3ipeN7m.jpg)
 ![Screen 5](https://imgur.com/dlbHKgd.jpg)
 
-<img src="https://imgur.com/dlbHKgd.jpg" alt="Image 5" height="300">
+<img src="https://imgur.com/dlbHKgd.jpg" alt="Image 5" height="600">
 
 
 
