@@ -9,5 +9,9 @@ Hackathon Project: Experimenting with Flutter and Location-Based Apps
 <img src="https://imgur.com/3ipeN7m.jpg" alt="Image 4" height="600">.
 <img src="https://imgur.com/dlbHKgd.jpg" alt="Image 5" height="600">
 
+Solarized dark             |  Solarized Ocean
+:-------------------------:|:-------------------------:
+<img src="https://imgur.com/dlbHKgd.jpg" alt="Image 5" height="600">  |  <img src="https://imgur.com/dlbHKgd.jpg" alt="Image 5" height="600">
+
 
 
